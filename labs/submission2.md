@@ -139,4 +139,4 @@ b80dd13 (tag: v1.0.0, origin/feature/lab2) Add task3
 9b3b85f (git-reset-practice) Add submission2
 ```
 ---
-Analysis: as we can see, commits in history are annotated with tags
+Analysis: as we can see, commits in history are annotated with tags. Tags are a powerful tool to add versioning to consecutive commits
