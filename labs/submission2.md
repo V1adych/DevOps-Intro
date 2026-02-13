@@ -109,3 +109,34 @@ Graph:
 ```
 Analysis: relevant commits start with `ef48d66`. The tree contains two commits for previous tasks, as well as commit from `side-branch`. 
 Head points to previous commit `816acab`, first `side-branch` commit `307e4d9` builds on top of HEAD, so it is not in `feature/lab2`
+
+## Task 4
+Commands:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+git log --oneline -3
+```
+Outputs:
+```bash
+b80dd13 (HEAD -> feature/lab2, tag: v1.0.0, origin/feature/lab2) Add task3
+816acab Update submission2.md
+9b3b85f (git-reset-practice) Add submission2
+```
+---
+Commands:
+```bash
+echo "new contents" > v110.txt; git add v110.txt; git commit -m "Add commit with new tag"
+git tag v1.1.0
+git push origin v1.1.0
+git log --oneline -4
+```
+Outputs:
+```bash
+cd4b097 (HEAD -> feature/lab2, tag: v1.1.0) Add commit with new tag
+b80dd13 (tag: v1.0.0, origin/feature/lab2) Add task3
+816acab Update submission2.md
+9b3b85f (git-reset-practice) Add submission2
+```
+---
+Analysis: as we can see, commits in history are annotated with tags
