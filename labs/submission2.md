@@ -89,3 +89,23 @@ Outputs:
 ef48d66 Add test file
 ```
 Analysis: last reset moved us to source branch
+
+## Task 3
+Graph:
+```bash
+* 307e4d9 (side-branch) Side branch commit
+* 816acab (HEAD -> feature/lab2, origin/feature/lab2) Update submission2.md
+* 9b3b85f (git-reset-practice) Add submission2
+* ef48d66 Add test file
+| * be21017 (origin/feature/lab1, feature/lab1) Add PR template proof
+| * ddab4df Add evidences
+| * 7bd19c0 Add submission1.md
+|/  
+* 74929dd (origin/main, origin/HEAD, main) Add template
+* d6b6a03 Update lab2
+* 87810a0 feat: remove old Exam Exemption Policy
+| * 0a09c16 (origin/release/f25) feat: remove old Exam Exemption Policy
+|/  
+```
+Analysis: relevant commits start with `ef48d66`. The tree contains two commits for previous tasks, as well as commit from `side-branch`. 
+Head points to previous commit `816acab`, first `side-branch` commit `307e4d9` builds on top of HEAD, so it is not in `feature/lab2`
