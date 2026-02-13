@@ -178,3 +178,9 @@ Analysis: There are multiple ways to navigate between branches/commits or file v
 - `git checkout` is legacy way that supports both files and branches
 - `git switch` is used to navigate between branches
 - `git restore` is used to manage file versions across commits
+
+## Task 6
+### Starring repositories
+Helps to promote useful repositories in the community, making more popular repositories more reliable from the perspective of the members, indicating high quality/maintenance efforts.
+### Following
+Might be helpful in developing career, creating/participating a network of community members with similar interests
