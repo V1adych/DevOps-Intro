@@ -22,7 +22,6 @@ gpgsig -----BEGIN SSH SIGNATURE-----
 
 Add test file
 ```
----
 Analysis: commit hash stores a point in time representing specific commit
 
 ### Tree hash
@@ -39,6 +38,54 @@ Output:
 040000 tree d3fb3722b7a867a83efde73c57c49b5ab3e62c63    lectures
 100644 blob 2eec599a1130d2ff231309bb776d1989b97c6ab2    test.txt
 ```
----
 Analysis: tree hash stores a hash of a directory of a repo. Tree/Blob hashes are used to save storage on duplicate data across repository
 
+
+## Task 2
+
+### Commits
+Commands (taken from instruction):
+```bash
+echo "First commit" > file.txt && git add file.txt && git commit -m "First commit"
+echo "Second commit" >> file.txt && git add file.txt && git commit -m "Second commit"
+echo "Third commit"  >> file.txt && git add file.txt && git commit -m "Third commit"
+git reflog -5
+```
+Outputs:
+```bash
+ae7b394 (HEAD -> git-reset-practice) HEAD@{0}: commit: Third commit
+1402e35 HEAD@{1}: commit: Second commit
+54bc58e HEAD@{2}: commit: First commit
+9b3b85f (origin/feature/lab2, feature/lab2) HEAD@{3}: checkout: moving from feature/lab2 to git-reset-practice
+9b3b85f (origin/feature/lab2, feature/lab2) HEAD@{4}: commit: Add submission2
+```
+Analysis: reflog shows movements of head: switching to new branch (`@{3} -> @{2}`) and piling up commits (`@{1}`, `@{2}`, `@{3}`)
+
+### Resets
+Commands (taken from instruction):
+```bash
+git reset --soft HEAD~1
+git reset --hard HEAD~1
+git reflog -5
+```
+Outputs:
+```bash
+54bc58e (HEAD -> git-reset-practice) HEAD@{0}: reset: moving to HEAD~1
+1402e35 HEAD@{1}: reset: moving to HEAD~1
+ae7b394 HEAD@{2}: commit: Third commit
+1402e35 HEAD@{3}: commit: Second commit
+54bc58e (HEAD -> git-reset-practice) HEAD@{4}: commit: First commit
+```
+Analysis: Resets discarded two latest commits, movement can be seen in reflog (`@{0}`, `@{1}`)
+---
+Commands:
+```bash
+git reset --hard 9b3b85f
+git log --oneline -2
+```
+Outputs:
+```
+9b3b85f (HEAD -> git-reset-practice, origin/feature/lab2, feature/lab2) Add submission2
+ef48d66 Add test file
+```
+Analysis: last reset moved us to source branch
