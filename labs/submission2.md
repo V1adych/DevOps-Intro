@@ -140,3 +140,41 @@ b80dd13 (tag: v1.0.0, origin/feature/lab2) Add task3
 ```
 ---
 Analysis: as we can see, commits in history are annotated with tags. Tags are a powerful tool to add versioning to consecutive commits
+
+## Task 5
+Commands:
+```bash
+git switch -c cmd-compare # Created and switched to new branch
+git switch - # back to original branch
+git checkout -b cmd-compare-2 # cmd-compare-2 branch is created and switched to it
+echo "scratch" >> demo.txt; git add demo.txt
+git restore --staged demo.txt 
+git status
+git branch
+```
+
+`git status` Outputs:
+```bash
+On branch cmd-compare-2
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        demo.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+`git branch` Outputs:
+```bash
+  cmd-compare
+* cmd-compare-2
+  feature/lab1
+  feature/lab2
+  git-reset-practice
+  main
+  side-branch
+```
+
+Analysis: There are multiple ways to navigate between branches/commits or file versions.
+- `git checkout` is legacy way that supports both files and branches
+- `git switch` is used to navigate between branches
+- `git restore` is used to manage file versions across commits
