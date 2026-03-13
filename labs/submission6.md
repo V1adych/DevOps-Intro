@@ -136,9 +136,6 @@ security features and capabilities please refer to
 ---
 
 ```bash
-$ docker cp index.html nginx_container:/usr/share/nginx/html/
-lstat /Users/v1adych/inno/devops/DevOps-Intro/index.html: no such file or directory
-
 $ docker cp labs/index.html nginx_container:/usr/share/nginx/html/
 Successfully copied 2.05kB to nginx_container:/usr/share/nginx/html/
 
