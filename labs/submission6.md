@@ -80,8 +80,127 @@ Deleted: sha256:d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9
 - `docker images ubuntu` shows image size: `139MB`.
 - Exported tar file size: `28M`.
 - Tar file is smaller than image size in local listing.
-- Image layer count: I did not check it separately in this step.
 - First `docker rmi ubuntu:latest` failed with conflict, because `ubuntu_container` was still using image `d1e2e92c075e`.
 - After `docker rm ubuntu_container`, image removal succeeded (`Untagged` + `Deleted`).
 - Image removal fails while at least one existing container references that image.
-- I think exported tar file includes image metadata + layers needed to load the image later with `docker load`.
+- Exported tar file includes image metadata + layers needed to load the image later with `docker load`.
+
+### Task 2
+
+#### 2.1: Deploy and Customize Nginx
+
+```bash
+$ docker run -d -p 80:80 --name nginx_container nginx
+Unable to find image 'nginx:latest' locally
+latest: Pulling from library/nginx
+a87363d30ab0: Pull complete
+d456cad1d0ff: Pull complete
+2e1e80a9149a: Pull complete
+fbeac1abb084: Pull complete
+fca7a914ec95: Pull complete
+7e3a4af256ee: Pull complete
+Digest: sha256:bc45d248c4e1d1709321de61566eb2b64d4f0e32765239d66573666be7f13349
+Status: Downloaded newer image for nginx:latest
+9feec4611bb271c57957a57677c8167d69012dbc8b399b9c8859949d3d2088f8
+
+$ curl http://localhost
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, nginx is successfully installed and working.
+Further configuration is required for the web server, reverse proxy,
+API gateway, load balancer, content cache, or other features.</p>
+
+<p>For online documentation and support please refer to
+<a href="https://nginx.org/">nginx.org</a>.<br/>
+To engage with the community please visit
+<a href="https://community.nginx.org/">community.nginx.org</a>.<br/>
+For enterprise grade support, professional services, additional
+security features and capabilities please refer to
+<a href="https://f5.com/nginx">f5.com/nginx</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+---
+
+```bash
+$ docker cp index.html nginx_container:/usr/share/nginx/html/
+lstat /Users/v1adych/inno/devops/DevOps-Intro/index.html: no such file or directory
+
+$ docker cp labs/index.html nginx_container:/usr/share/nginx/html/
+Successfully copied 2.05kB to nginx_container:/usr/share/nginx/html/
+
+$ curl http://localhost
+<html>
+<head>
+<title>The best</title>
+</head>
+<body>
+<h1>website</h1>
+</body>
+</html>
+```
+
+#### 2.2: Create and Test Custom Image
+
+```bash
+$ docker commit nginx_container my_website:latest
+sha256:1d36e036430fa8fec08ed6cc56b9f4130d3b468c8b42db1cbc817056c1620380
+
+$ docker images my_website
+REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
+my_website   latest    1d36e036430f   6 seconds ago   255MB
+```
+
+---
+
+```bash
+$ docker rm -f nginx_container
+nginx_container
+
+$ docker run -d -p 80:80 --name my_website_container my_website:latest
+cd9226a10e633eff801810c3dd918535ae9e7cda4721ad803db082f69217413e
+
+$ curl http://localhost
+<html>
+<head>
+<title>The best</title>
+</head>
+<body>
+<h1>website</h1>
+</body>
+</html>
+```
+
+---
+
+```bash
+$ docker diff my_website_container
+C /etc
+C /etc/nginx
+C /etc/nginx/conf.d
+C /etc/nginx/conf.d/default.conf
+C /run
+C /run/nginx.pid
+```
+
+### Observations and Analysis
+
+- `curl http://localhost` first returned default Nginx welcome page.
+- After copy, `curl http://localhost` returned custom HTML (`The best` / `website`).
+- `docker diff my_website_container` output has only `C` markers, so some existing files/dirs were changed, no added (`A`) or deleted (`D`) entries in this run.
+- `docker commit` is fast for quick experiments and preserves current container state directly.
+- Dockerfile is better for reproducibility, reviewability, and sharing build steps in git.
+- Main downside of `docker commit`: harder to track exactly what changed compared to Dockerfile instructions.
