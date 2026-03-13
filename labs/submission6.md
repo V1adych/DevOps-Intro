@@ -318,3 +318,75 @@ Address: 172.18.0.3
 - `nslookup container2` from `container1` resolved name to `172.18.0.3` using Docker DNS `127.0.0.11`.
 - Docker internal DNS lets containers communicate by container name, no manual `/etc/hosts` needed.
 - User-defined bridge network is more convenient than default bridge: automatic DNS by name, cleaner isolation for project containers, and easier service grouping.
+
+### Task 4
+
+#### 4.1: Create and Use Volume
+
+```bash
+$ docker volume create app_data
+app_data
+
+$ docker volume ls
+DRIVER    VOLUME NAME
+...
+local     app_data
+...
+```
+
+---
+
+```bash
+$ docker run -d -p 80:80 -v app_data:/usr/share/nginx/html --name web nginx
+bd6cbd953211b5a968155bcddfae9248103ce1e8ef9897fba0756fe4f8d67c66
+
+$ docker cp labs/index.html web:/usr/share/nginx/html/
+Successfully copied 2.05kB to web:/usr/share/nginx/html/
+
+$ curl http://localhost
+<html><body><h1>Persistent Data</h1></body></html>
+```
+
+Custom HTML used:
+```html
+<html><body><h1>Persistent Data</h1></body></html>
+```
+
+#### 4.2: Verify Persistence
+
+```bash
+$ docker stop web && docker rm web
+web
+web
+
+$ docker run -d -p 80:80 -v app_data:/usr/share/nginx/html --name web_new nginx
+1b1add86777763da06982e84a784e959af0c7c52f1e2262a9477a633bb7b8894
+
+$ curl http://localhost
+<html><body><h1>Persistent Data</h1></body></html>
+```
+
+---
+
+```bash
+$ docker volume inspect app_data
+[
+    {
+        "CreatedAt": "2026-03-13T16:10:10Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/app_data/_data",
+        "Name": "app_data",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+```
+
+### Observations and Analysis
+
+- Data persisted after container recreation (`web` -> `web_new`) because files were stored in named volume `app_data`.
+- Persistence is important because containers are replaceable, but application data must survive restarts/redeploys.
+- Volumes: Docker-managed persistent storage, best default for container app data.
+- Bind mounts: map host path directly, useful for local development and live file editing.
+- Container storage (writable layer): tied to one container lifecycle, good for temporary/ephemeral data only.
