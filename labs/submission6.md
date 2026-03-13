@@ -201,3 +201,120 @@ C /run/nginx.pid
 - `docker commit` is fast for quick experiments and preserves current container state directly.
 - Dockerfile is better for reproducibility, reviewability, and sharing build steps in git.
 - Main downside of `docker commit`: harder to track exactly what changed compared to Dockerfile instructions.
+
+### Task 3
+
+#### 3.1: Create Custom Network
+
+```bash
+$ docker network create lab_network
+cb403d60b0a1b1d66733669fe32ef06c2838d7ec2e85fbbbe39d79309d89391c
+
+$ docker network ls
+NETWORK ID     NAME          DRIVER    SCOPE
+7e78287040be   bridge        bridge    local
+922807aeaf14   host          host      local
+cb403d60b0a1   lab_network   bridge    local
+746d67d55341   none          null      local
+```
+
+---
+
+```bash
+$ docker run -dit --network lab_network --name container1 alpine ash
+86b2d2fa99ace99712d7fd8f0396795d8ebdd03a3c5f61d62e07f6d4b98650ae
+
+$ docker run -dit --network lab_network --name container2 alpine ash
+6be4f859c259c617a74296fbc741505926138b8088dffeaf969ea508dc8dd287
+```
+
+#### 3.2: Test Connectivity and DNS
+
+```bash
+$ docker exec container1 ping -c 3 container2
+PING container2 (172.18.0.3): 56 data bytes
+64 bytes from 172.18.0.3: seq=0 ttl=64 time=0.110 ms
+64 bytes from 172.18.0.3: seq=1 ttl=64 time=0.141 ms
+64 bytes from 172.18.0.3: seq=2 ttl=64 time=0.187 ms
+
+--- container2 ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 0.110/0.146/0.187 ms
+```
+
+---
+
+```bash
+$ docker network inspect lab_network
+[
+    {
+        "Name": "lab_network",
+        "Id": "cb403d60b0a1b1d66733669fe32ef06c2838d7ec2e85fbbbe39d79309d89391c",
+        "Created": "2026-03-13T16:02:50.821276795Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv4": true,
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "6be4f859c259c617a74296fbc741505926138b8088dffeaf969ea508dc8dd287": {
+                "Name": "container2",
+                "EndpointID": "8048cd18a8e15d192b96046fd349a12c60163d4fed2c4f912cb0002a6356deab",
+                "MacAddress": "6a:7c:b4:a9:aa:56",
+                "IPv4Address": "172.18.0.3/16",
+                "IPv6Address": ""
+            },
+            "86b2d2fa99ace99712d7fd8f0396795d8ebdd03a3c5f61d62e07f6d4b98650ae": {
+                "Name": "container1",
+                "EndpointID": "e730da44c7d0c444ac89d98bac8068e1e3c7406ee309c3520255425550784283",
+                "MacAddress": "4a:e9:37:f4:54:21",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {
+            "com.docker.network.enable_ipv4": "true",
+            "com.docker.network.enable_ipv6": "false"
+        },
+        "Labels": {}
+    }
+]
+```
+
+---
+
+```bash
+$ docker exec container1 nslookup container2
+Server:         127.0.0.11
+Address:        127.0.0.11:53
+
+Non-authoritative answer:
+
+Non-authoritative answer:
+Name:   container2
+Address: 172.18.0.3
+```
+
+### Observations and Analysis
+
+- `ping` from `container1` to `container2` succeeded with `0% packet loss`.
+- `docker network inspect lab_network` shows both containers in same subnet: `container1 = 172.18.0.2`, `container2 = 172.18.0.3`.
+- `nslookup container2` from `container1` resolved name to `172.18.0.3` using Docker DNS `127.0.0.11`.
+- Docker internal DNS lets containers communicate by container name, no manual `/etc/hosts` needed.
+- User-defined bridge network is more convenient than default bridge: automatic DNS by name, cleaner isolation for project containers, and easier service grouping.
